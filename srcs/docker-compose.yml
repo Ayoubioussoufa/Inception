@@ -16,7 +16,7 @@ volumes:
 
 services:
     nginx:
-        build: requirements/nginx
+        build: ./requirements/nginx
         container_name: nginx
         image: nginx
         ports:
@@ -32,11 +32,11 @@ services:
             - net_work
 
     wordpress:
-        build: requirements/wordpress
+        build: ./requirements/wordpress
         container_name: wordpress
         image: wordpress
         depends_on:
-            - database
+            - mariadb
         volumes:
             - wordpress_data:/var/www/wordpress
         restart: always
@@ -45,9 +45,9 @@ services:
         networks:
             - net_work
 
-    database:
-        container_name: database
-        build: requirements/mariadb
+    mariadb:
+        container_name: mariadb
+        build: ./requirements/mariadb
         image: mariadb
         restart: always
         volumes:
