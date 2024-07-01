@@ -1,0 +1,288 @@
+env .gitignorih and be saved locally
+
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/
+
+
+
+
+
+
+
+
+
+
+
+
+ Working with Docker involves understanding its core concepts, such as containers, images, Dockerfiles, and Docker Compose. Below, I'll guide you through the essential knowledge you need to work with Docker, focusing on setting up services like MariaDB, Nginx, and WordPress.
+
+### Docker Core Concepts
+
+1. **Containers**: 
+   - Docker containers are lightweight, portable, and self-sufficient execution environments that contain everything needed to run an application (code, runtime, libraries, dependencies, and configurations). They run as isolated processes on the host OS.
+
+2. **Images**:
+   - Docker images are read-only templates used to create containers. They contain instructions (via layers) on how to create a container. Images can be pulled from registries (like Docker Hub) or built locally using Dockerfiles.
+
+3. **Dockerfile**:
+   - A Dockerfile is a text file that contains a series of instructions to assemble a Docker image. It includes commands to install dependencies, copy files, and configure the container environment.
+
+4. **Docker Compose**:
+   - Docker Compose is a tool for defining and running multi-container Docker applications. It uses a YAML file (docker-compose.yml) to configure services, networks, and volumes. It simplifies the process of managing complex multi-container applications.
+
+### Setting Up Services with Docker: MariaDB, Nginx, and WordPress
+
+#### 1. MariaDB Service
+
+- **Docker Image**: Official MariaDB Docker image is available on Docker Hub.
+  
+- **Docker Compose Configuration**:
+  ```yaml
+  version: '3.8'
+
+  services:
+    mariadb:
+      image: mariadb
+      restart: always
+      environment:
+        MYSQL_ROOT_PASSWORD: your_root_password
+        MYSQL_DATABASE: your_database_name
+        MYSQL_USER: your_username
+        MYSQL_PASSWORD: your_password
+      volumes:
+        - mariadb_data:/var/lib/mysql
+
+  volumes:
+    mariadb_data:
+  ```
+
+- **Explanation**:
+  - This `docker-compose.yml` file defines a MariaDB service (`mariadb`) using the official MariaDB image.
+  - It sets environment variables (`MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`) for initial setup.
+  - It mounts a volume (`mariadb_data`) to persist MariaDB data.
+
+#### 2. Nginx Service
+
+- **Docker Image**: Official Nginx Docker image is available on Docker Hub.
+  
+- **Docker Compose Configuration**:
+  ```yaml
+  version: '3.8'
+
+  services:
+    nginx:
+      image: nginx
+      restart: always
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      depends_on:
+        - wordpress
+
+  wordpress:
+    image: wordpress
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_NAME: your_database_name
+      WORDPRESS_DB_USER: your_username
+      WORDPRESS_DB_PASSWORD: your_password
+    volumes:
+      - wordpress_data:/var/www/html
+
+  volumes:
+    wordpress_data:
+  ```
+
+- **Explanation**:
+  - This `docker-compose.yml` file sets up two services: `nginx` and `wordpress`.
+  - `nginx` service uses the official Nginx image, exposes ports 80 and 443, and mounts a custom `nginx.conf` configuration file.
+  - `wordpress` service uses the official WordPress image, sets environment variables (`WORDPRESS_DB_HOST`, `WORDPRESS_DB_NAME`, `WORDPRESS_DB_USER`, `WORDPRESS_DB_PASSWORD`), and mounts a volume (`wordpress_data`) to persist WordPress data.
+  - `depends_on` ensures that `nginx` starts after `wordpress`.
+
+#### 3. WordPress Service
+
+- **Docker Image**: Official WordPress Docker image is available on Docker Hub.
+  
+- **Docker Compose Configuration**:
+  (Already included in the Nginx service example above)
+
+### Steps to Deploy and Manage
+
+1. **Install Docker**: Ensure Docker is installed on your system (Linux, macOS, or Windows).
+
+2. **Create Docker Compose File**: Create a `docker-compose.yml` file with the configurations for MariaDB, Nginx, and WordPress as shown above.
+
+3. **Start Containers**: Navigate to the directory containing `docker-compose.yml` and run:
+   ```bash
+   docker-compose up -d
+   ```
+   This command will start containers in detached mode (in the background).
+
+4. **Access Services**: 
+   - Nginx: Open `http://localhost` in a web browser.
+   - WordPress: Complete the WordPress setup via the web interface (`http://localhost`).
+
+5. **Manage Containers**:
+   - Stop containers: `docker-compose stop`
+   - Start containers: `docker-compose start`
+   - Remove containers: `docker-compose down`
+
+6. **Customization and Maintenance**:
+   - Modify `docker-compose.yml` for additional configurations.
+   - Manage volumes (`docker volume ls`, `docker volume rm`) for persistent data.
+
+### Conclusion
+
+Working with Docker involves understanding its core concepts, using Dockerfiles for image creation, Docker Compose for multi-container applications, and managing services like MariaDB, Nginx, and WordPress efficiently. This setup provides a robust environment for developing, testing, and deploying applications in a consistent and portable manner using containers.
+
+---------------------------------------------------------------------------------------------------
+
+Certainly! Let's delve into each of these components and their roles when used in a Dockerized environment.
+
+### 1. Nginx
+**Nginx** is a high-performance web server and reverse proxy server. It is known for its stability, rich feature set, simple configuration, and low resource consumption.
+
+#### Role in a Dockerized Environment:
+- **Web Server**: Serves static files (HTML, CSS, JS) and handles HTTP requests.
+- **Reverse Proxy**: Forwards requests to other services (like a backend application server) and can load balance between multiple servers.
+- **SSL Termination**: Manages SSL/TLS encryption to secure communications.
+
+In Docker, Nginx would be run in its own container, typically configured to listen for incoming web traffic and route it to the appropriate backend service, such as a WordPress application server.
+
+### 2. MariaDB
+**MariaDB** is an open-source relational database management system (RDBMS) that is a fork of MySQL. It is designed for scalability, reliability, and performance.
+
+#### Role in a Dockerized Environment:
+- **Database Server**: Stores and manages the data for applications, providing data storage, retrieval, and manipulation capabilities.
+
+In Docker, MariaDB would be run in its own container, where it stores the data for the WordPress site, such as posts, user information, settings, etc.
+
+### 3. WordPress
+**WordPress** is a popular open-source content management system (CMS) that powers a significant portion of the web. It is known for its ease of use, flexibility, and large ecosystem of plugins and themes.
+
+#### Role in a Dockerized Environment:
+- **Application Server**: Runs the PHP application that serves dynamic content to users. It interacts with the database to store and retrieve content.
+
+In Docker, WordPress would be run in its own container, where it acts as the application server. It will connect to the MariaDB container to fetch and store data.
+
+### Dockerized Setup and Interlinking
+In a Dockerized setup, each service (Nginx, MariaDB, and WordPress) runs in its own container. Here's how they interact with each other:
+
+1. **Nginx Container**:
+   - Acts as a reverse proxy and load balancer.
+   - Receives HTTP requests from users.
+   - Forwards requests to the WordPress container.
+
+2. **WordPress Container**:
+   - Runs the WordPress application.
+   - Processes user requests, fetches data from the MariaDB container, and generates dynamic web pages.
+   - Responds to Nginx with the processed content.
+
+3. **MariaDB Container**:
+   - Stores the WordPress database.
+   - Handles database queries from the WordPress container.
+
+### Docker Compose Example
+Using Docker Compose simplifies the setup and management of multi-container Docker applications. Here’s an example of a `docker-compose.yml` file that sets up these three services:
+
+```yaml
+version: '3.7'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - wordpress
+    networks:
+      - wordpress_network
+
+  mariadb:
+    image: mariadb:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - wordpress_network
+
+  wordpress:
+    image: wordpress:latest
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    depends_on:
+      - mariadb
+    networks:
+      - wordpress_network
+
+volumes:
+  db_data:
+  wordpress_data:
+
+networks:
+  wordpress_network:
+```
+
+### Explanation of the Compose File:
+- **Networks**: All services are connected to a shared network `wordpress_network` to enable inter-container communication.
+- **Volumes**: Persistent storage is defined for both MariaDB (`db_data`) and WordPress (`wordpress_data`).
+- **Service Dependencies**: The `depends_on` directive ensures that the necessary services are started in the correct order.
+
+### Conclusion
+In a Dockerized setup, Nginx, MariaDB, and WordPress each play crucial roles:
+- **Nginx** manages incoming web traffic.
+- **MariaDB** handles database operations.
+- **WordPress** serves as the application server.
+
+By using Docker, each service can be isolated in its own container, promoting modularity, scalability, and ease of maintenance. Docker Compose further simplifies the orchestration and management of these interdependent services.
+
+
+--------------------------------------------------------------------------------------------
+
+# How does docker run as an isolated process in the host machine OS?
+
+Docker containers run as isolated processes on the host operating system, with their own separate PID. The processes are isolated from each other and from the host OS, so that each process container runs as if it were the only process in the host.
+
+Each container has its own file system, network namespace, and process namespace, which provides the isolation required to run multiple containers on the same host without interfering with each other.
+
+When a process runs whithin a container, it is assigned a PID whithin the container’s namespace, which is different from the PID that the same process would have if it were runnin on the host OS directly.
+
+### When does a docker container stop?
+
+When a process whithin a docker container stops, the container will stop as well.
+
+The container is considered running as long as there is at least one process running within the container’s namespace. When the last process whithin a container stops, the container will stop and transition into an “exited” state.
+
+
+
+db name, db user makayninch, idk why

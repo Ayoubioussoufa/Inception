@@ -5,6 +5,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /run/nginx
 
+RUN mkdir -p /etc/nginx/certs
 RUN mkdir -p /var/www/wordpress
 
 WORKDIR /etc/nginx/certs
