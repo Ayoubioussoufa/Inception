@@ -1,4 +1,19 @@
 version: '3.7'
+
+volumes:
+    wordpress_data:
+        driver: local
+        driver_opts:
+            type: none
+            device: /home/aybiouss/data/wordpress
+            o: bind
+    mariadb_data:
+        driver: local
+        driver_opts:
+            type: none
+            device: /home/aybiouss/data/mariadb
+            o: bind
+
 services:
     mariadb:
         container_name: mariadb
@@ -6,16 +21,14 @@ services:
         image: mariadb
         restart: always
         volumes:
-            - mariadb:/var/lib/mysql 
+            - mariadb_data:/var/lib/mysql 
         environment:
             - MYSQL_DATABASE=$(MYSQL_DATABASE)
-            - MYSQL_ROOT_PASSWORD=$(MYSQL_ROOT_PASSWORD)
             - MYSQL_USER=$(MYSQL_USER)
             - MYSQL_PASSWORD=$(MYSQL_PASSWORD)
+            - MYSQL_ROOT_PASSWORD=$(MYSQL_ROOT_PASSWORD)
         networks:
             - wordpress
-        # ports:
-        #     - 3306:3306
         init : true
 
     wordpress:
@@ -25,7 +38,7 @@ services:
         depends_on:
             - mariadb
         volumes:
-            - wordpress:/var/www/wordpress
+            - wordpress_data:/var/www/wordpress
         env_file:
             - .env
         networks:
@@ -35,29 +48,21 @@ services:
         links:
             - mariadb
         environment:
-            - MYSQL_DATABASE=$(MYSQL_DATABASE)
-            - MYSQL_ROOT_PASSWORD=$(MYSQL_ROOT_PASSWORD)
-            - MYSQL_USER=$(MYSQL_USER)
-            - MYSQL_PASSWORD=$(MYSQL_PASSWORD)
             - WORDPRESS_DB_HOST=$(WORDPRESS_DB_HOST)
             - WORDPRESS_DB_NAME=$(WORDPRESS_DB_NAME)
             - WORDPRESS_DB_PASSWORD=$(WORDPRESS_DB_PASSWORD)
-            - WORDPRESS_TABLE_PREFIX=${WORDPRESS_TABLE_PREFIX} #####
-        # ports:
-        #     - 9000:9000
-        #     - 3306:3306
+            - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
 
     nginx:
         container_name: nginx
         build: ./requirements/nginx
         image: nginx
-        # ports:
-        #     - 443:443
-        #     - 9000:9000
+        ports:
+            - 443:443
         depends_on:
             - wordpress
         volumes:
-            - wordpress:/var/www/wordpress
+            - wordpress_data:/var/www/wordpress
         restart: always
         env_file:
             - .env
@@ -68,24 +73,3 @@ services:
 networks:
     wordpress:
         driver: bridge
-
-volumes :
-    mariadb:
-    wordpress:
-
-
-
-
-    # volumes:
-#     wordpress_data:
-#         driver: local
-#         driver_opts:
-#             type: none
-#             device: /home/aybiouss/data/wordpress
-#             o: bind
-#     mariadb_data:
-#         driver: local
-#         driver_opts:
-#             type: none
-#             device: /home/aybiouss/data/mariadb
-#             o: bind
