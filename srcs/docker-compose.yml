@@ -1,5 +1,4 @@
 version: '3.7'
-
 volumes:
     wordpress_data:
         driver: local
@@ -14,48 +13,11 @@ volumes:
             device: /home/aybiouss/data/mariadb
             o: bind
 
+
 services:
-    mariadb:
-        container_name: mariadb
-        build: ./requirements/mariadb
-        image: mariadb
-        restart: always
-        volumes:
-            - mariadb_data:/var/lib/mysql 
-        environment:
-            - MYSQL_DATABASE=$(MYSQL_DATABASE)
-            - MYSQL_USER=$(MYSQL_USER)
-            - MYSQL_PASSWORD=$(MYSQL_PASSWORD)
-            - MYSQL_ROOT_PASSWORD=$(MYSQL_ROOT_PASSWORD)
-        networks:
-            - wordpress
-        init : true
-
-    wordpress:
-        container_name: wordpress
-        build: ./requirements/wordpress
-        image: wordpress
-        depends_on:
-            - mariadb
-        volumes:
-            - wordpress_data:/var/www/wordpress
-        env_file:
-            - .env
-        networks:
-            - wordpress
-        restart: always
-        init : true
-        links:
-            - mariadb
-        environment:
-            - WORDPRESS_DB_HOST=$(WORDPRESS_DB_HOST)
-            - WORDPRESS_DB_NAME=$(WORDPRESS_DB_NAME)
-            - WORDPRESS_DB_PASSWORD=$(WORDPRESS_DB_PASSWORD)
-            - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
-
     nginx:
+        build: requirements/nginx
         container_name: nginx
-        build: ./requirements/nginx
         image: nginx
         ports:
             - 443:443
@@ -63,12 +25,44 @@ services:
             - wordpress
         volumes:
             - wordpress_data:/var/www/wordpress
-        restart: always
+        restart: on-failure
         env_file:
-            - .env
+            - ../.env
         networks:
             - wordpress
-        init : true
+        # init : true
+
+    wordpress:
+        build: requirements/wordpress
+        container_name: wordpress
+        image: wordpress
+        depends_on:
+            - mariadb
+        volumes:
+            - wordpress_data:/var/www/wordpress
+        restart: on-failure
+        env_file:
+            - ../.env
+        networks:
+            - wordpress
+        links:
+            - mariadb
+        ports:
+            - 9000:9000
+        # init : true
+
+    mariadb:
+        container_name: mariadb
+        build: requirements/mariadb
+        image: mariadb
+        restart: on-failure
+        volumes:
+            - mariadb_data:/var/lib/mysql 
+        env_file:
+            - ../.env
+        networks:
+            - wordpress
+        # init : true
 
 networks:
     wordpress:

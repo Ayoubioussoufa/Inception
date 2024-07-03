@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Container names
+MARIADB_CONTAINER=mariadb
+WORDPRESS_CONTAINER=wordpress
+NGINX_CONTAINER=nginx
+
+echo "Checking if containers are running..."
+for CONTAINER in $MARIADB_CONTAINER $WORDPRESS_CONTAINER $NGINX_CONTAINER; do
+  if [ $(docker inspect -f '{{.State.Running}}' $CONTAINER) = "true" ]; then
+    echo "$CONTAINER is running."
+  else
+    echo "$CONTAINER is not running. Exiting..."
+    exit 1
+  fi
+done
+
+echo "Checking connectivity from WordPress to MariaDB..."
+docker exec -it $WORDPRESS_CONTAINER bash -c "apt-get update && apt-get install -y telnet"
+if docker exec -it $WORDPRESS_CONTAINER bash -c "telnet $MARIADB_CONTAINER 3306"; then
+  echo "WordPress can connect to MariaDB."
+else
+  echo "WordPress cannot connect to MariaDB. Exiting..."
+  exit 1
+fi
+
+echo "Checking Nginx configuration..."
+docker exec -it $NGINX_CONTAINER cat /etc/nginx/nginx.conf
+
+echo "Ensuring Nginx configuration includes WordPress proxy settings..."
+docker exec -it $NGINX_CONTAINER bash -c "echo 'server {
+    listen 80;
+    server_name login.42.fr;
+
+    location / {
+        proxy_pass http://$WORDPRESS_CONTAINER:80;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}' > /etc/nginx/conf.d/wordpress.conf"
+
+echo "Restarting Nginx to apply configuration changes..."
+docker exec -it $NGINX_CONTAINER nginx -s reload
+
+echo "Checking WordPress site access via Nginx..."
+if curl -s -o /dev/null -w "%{http_code}" http://login.42.fr | grep -q "200"; then
+  echo "WordPress site is accessible via Nginx."
+else
+  echo "WordPress site is not accessible via Nginx. Exiting..."
+  exit 1
+fi
+
+echo "Checking MariaDB database setup..."
+docker exec -it $MARIADB_CONTAINER mysql -u root -p -e "SHOW DATABASES;"
+docker exec -it $MARIADB_CONTAINER mysql -u root -p -e "USE wordpress; SHOW TABLES;"
+
+echo "Setup seems correct. All tests passed."

@@ -1,11 +1,8 @@
 FROM debian:buster
 
 RUN apt-get update && \
-    apt-get install -y nginx openssl && \
-    rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /run/nginx
+    apt-get install -y nginx openssl
 
-RUN mkdir -p /etc/nginx/certs
 RUN mkdir -p /var/www/wordpress
 
 WORKDIR /etc/nginx/certs
