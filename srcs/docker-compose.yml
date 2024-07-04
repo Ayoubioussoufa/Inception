@@ -1,13 +1,14 @@
-version: '3.7'
 volumes:
     wordpress_data:
         driver: local
+        name: wordpress
         driver_opts:
             type: none
             device: /home/aybiouss/data/wordpress
             o: bind
     mariadb_data:
         driver: local
+        name: mariadb
         driver_opts:
             type: none
             device: /home/aybiouss/data/mariadb
@@ -16,40 +17,36 @@ volumes:
 
 services:
     nginx:
-        build: requirements/nginx
-        container_name: nginx
+        build: ./requirements/nginx
+        pull_policy: never
         image: nginx
-        ports:
-            - 443:443
-        depends_on:
-            - wordpress
+        container_name: nginx
         volumes:
-            - wordpress_data:/var/www/wordpress
-        restart: on-failure
-        env_file:
-            - ../.env
+        - wordpress_data:/var/www/wordpress
+        restart: always
+        ports:
+          - "443:443"
         networks:
-            - wordpress
-        # init : true
+          - inception
+        depends_on:
+          - wordpress
+        init : true
 
     wordpress:
-        build: requirements/wordpress
-        container_name: wordpress
+        pull_policy: never
         image: wordpress
-        depends_on:
-            - mariadb
+        container_name: wordpress
         volumes:
-            - wordpress_data:/var/www/wordpress
-        restart: on-failure
+          - wordpress_data:/var/www/wordpress
+        restart: always
+        build: ./requirements/wordpress
         env_file:
-            - ../.env
+          - .env
         networks:
-            - wordpress
-        links:
-            - mariadb
-        ports:
-            - 9000:9000
-        # init : true
+          - inception
+        depends_on:
+          - mariadb
+        init : true
 
     mariadb:
         container_name: mariadb
@@ -59,11 +56,11 @@ services:
         volumes:
             - mariadb_data:/var/lib/mysql 
         env_file:
-            - ../.env
+            - ./.env
         networks:
-            - wordpress
-        # init : true
+            - inception
+        init : true
 
 networks:
-    wordpress:
+    inception:
         driver: bridge

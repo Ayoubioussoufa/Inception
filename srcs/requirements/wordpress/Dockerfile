@@ -1,22 +1,22 @@
-FROM debian:buster
+FROM debian:11
 
-RUN apt update && apt upgrade -y \
-    && apt install php-fpm php-mysql wget unzip curl -y
+RUN apt update -y 
+RUN apt upgrade -y 
+RUN apt install curl -y 
+RUN apt install php-fpm -y
+RUN apt install php-mysql -y
+RUN apt install php-cli -y
+RUN apt install wget -y
+RUN apt-get install mariadb-client -y
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN php wp-cli.phar --info
 
-WORKDIR /var/www/
+RUN chmod +x wp-cli.phar
 
-RUN mkdir -p /var/www/wordpress
+RUN mv wp-cli.phar /usr/bin/wp
 
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+COPY ./tools/script.sh /
 
-RUN chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
+RUN chmod +x /script.sh
 
-RUN wget https://wordpress.org/latest.zip && unzip latest.zip && rm -rf  latest.zip
-
-COPY ./tools/script.sh ./script.sh
-
-RUN chmod +x script.sh
-
-ENTRYPOINT ["sh", "script.sh"]
-
-CMD ["php-fpm7.3", "-R", "-F"]
+ENTRYPOINT [ "bash", "script.sh" ]
