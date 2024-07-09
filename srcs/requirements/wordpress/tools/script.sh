@@ -5,7 +5,7 @@ cd /var/www/wordpress
 
 until mariadb -u "$MYSQL_USER" -h mariadb --password="${MYSQL_PASSWORD}" -e "show databases;"; do
   echo "Database is not up yet. Waiting..."
-  sleep 0.2 
+  sleep 1
 done
 
 # Use `sed` to edit a configuration file (`www.conf`) for PHP-FPM

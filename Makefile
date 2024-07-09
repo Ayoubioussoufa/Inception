@@ -5,16 +5,12 @@ include ./srcs/.env
 
 up:
 	@cd /home/aybiouss/Desktop/Inception/srcs && dotenv docker compose up -d
-	@echo "MYSQL_DATABASE is set to: $$MYSQL_DATABASE"
 
 build:
 	docker compose -f srcs/docker-compose.yml build
 
 build-no-cache:
 	docker compose -f srcs/docker-compose.yml build --no-cache
-
-# up:
-# 	docker compose -f srcs/docker-compose.yml up -d
 
 down:
 	docker compose -f srcs/docker-compose.yml down

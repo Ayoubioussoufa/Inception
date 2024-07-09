@@ -11,7 +11,7 @@ service mariadb stop
 
 echo "database have been created..."
 
-sleep 2
+sleep 3
 
 # `exec` to replace the current shell process with `mysqld_safe` command that is a script provided by MySQL to manage the startup of the MYSQL server
 exec mysqld_safe
