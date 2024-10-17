@@ -1,80 +1,68 @@
-## Docker Overview
+# Inception: Docker Infrastructure Setup Project
 
-Docker is an open platform for developing, shipping, and running applications. Docker enables you to separate your applications from your infrastructure so you can deliver software quickly. With Docker, you can manage your infrastructure in the same ways you manage your applications. By taking advantage of Docker's methodologies for shipping, testing, and deploying code, you can significantly reduce the delay between writing code and running it in production.
+![Image Description](https://github.com/aybiouss/inception/blob/master/dockere.png)
 
+## Introduction
 
-## Docker architecture
+This project involves setting up a small infrastructure using Docker, focusing on containerizing and orchestrating several services using docker-compose.
 
-Docker uses a client-server architecture. The Docker client talks to the Docker daemon, which does the heavy lifting of building, running, and distributing your Docker containers. The Docker client and daemon can run on the same system, or you can connect a Docker client to a remote Docker daemon. The Docker client and daemon communicate using a REST API, over UNIX sockets or a network interface. Another Docker client is Docker Compose, that lets you work with applications consisting of a set of containers.
+## Containers
+Containers are an abstraction at the app layer that packages code and dependencies together. Multiple containers can run on the same machine and share the OS kernel with other containers, each running as isolated processes in user space. Containers take up less space than VMs (container images are typically tens of MBs in size), can handle more applications and require fewer VMs and Operating systems.
 
+## Virtual Machines
+Virtual machines (VMs) are an abstraction of physical hardware turning one server into many servers. The hypervisor allows multiple VMs to run on a single machine. Each VM includes a full copy of an operating system, the application, necessary binaries and libraries – taking up tens of GBs. VMs also slow to boot.
 
-## Docker Client:
-The Docker client is the user interface or command-line tool that allows users to interact with Docker. It provides a command-line interface (CLI) and, in some cases, a graphical user interface (GUI) for managing Docker resources and executing commands. The Docker client can run on the same machine where Docker is installed or on a remote machine.
+## Why Docker and What is the problem that is solving ?
+so let’s imagine a scenario pre docker era we have tester and developer and the developer
+has just the code and its works perfectly fine on there system but when the tester take the code the test it in his machine its just doesn’t work and the reason could be a lot of thing it it might be the tester need some dependencies need to be installed in order for the code to work properly or some environnement variables needed to be added but they don’t exist it the tester machine. that means we found the problem how can we solve it ?
 
-## Docker Daemon (Server):
-The Docker daemon (or Docker server) is a background process that manages Docker containers on a host machine. It is responsible for building, running, and managing containers based on commands received from the Docker client. The daemon communicates with the host operating system, container runtimes (such as containerd), and the underlying infrastructure.
-The Docker daemon exposes a RESTful API that allows the Docker client to communicate with it. The communication between the Docker client and the Docker daemon can occur over a local Unix socket (/var/run/docker.sock) or a network socket.
+- `Here When Docker Comes Into Place.`
+but you can be asking your self why not use virtual machine it might be good idea but it has alot of cons so let’s take look on differences between docker and VM’s
 
+| Virtual Machine	                 |     Docker                        |
+|----------------------------------|-----------------------------------|
+| Occupy a lot of memory space	   | Occupy a lot less memory space    |
+| long time to boot up	           | quick boot up because it uses the running kernel that you using |
+| Difficult to scale up	           | super easy to scale               |
+| low efficiency	                 | high efficiency                   |
+| volumes storage cannot be shared across the VM’s	volumes. | storage can be shared across the host and the containers.|
 
-## overview of the interaction between the Docker client and Docker daemon:
+## This project setting up the following Docker services:
 
-Local Interaction:
-When the Docker client and daemon are on the same machine, the client sends commands to the daemon using a Unix socket (/var/run/docker.sock). The client and daemon can communicate over this local socket without network overhead.
+1. **NGINX with TLS**: A Docker container running NGINX configured to support TLSv1.2 or TLSv1.3 only.
+  - `NGINX` is a web server that can also be used as a reverse proxy, load balancer, and HTTP cache. It is known for its high performance, stability, and low resource consumption. NGINX is often used to handle server-side requests for web applications, and it can also be used to serve static content such as images and JavaScript files. In addition to its web server capabilities, NGINX can be configured to handle other types of network protocols, such as Secure Sockets Layer (SSL) and Transport Layer Security (TLS). It is often used in conjunction with other software, such as databases and content management systems, to build robust and scalable web applications.
+2. **WordPress with php-fpm**: A Docker container hosting WordPress with php-fpm installed and configured.
+  - `WordPress` is a content management system (CMS) based on PHP and MySQL. It is an open-source platform that is widely used for building websites, blogs, and applications. With WordPress, users can easily create and manage their own websites without the need for advanced technical skills. It is known for its simplicity and flexibility, making it a popular choice for both beginners and experienced developers. WordPress has a large community of users and developers who contribute to the platform, which has led to the development of a wide range of themes, plugins, and other tools that can be used to extend the functionality of WordPress websites.
+3. **MariaDB**: A Docker container hosting MariaDB without nginx.
+  - `MariaDB` is a free and open-source relational database management system (RDBMS) that is widely used as a drop-in replacement for MySQL. It is named after the developer's daughter, Maria, and is designed to be a community-driven alternative to MySQL, with a focus on simplicity, collaboration, and compatibility with other database systems.
+4. **Volumes**: Two volumes are required:
+   - One for the WordPress database.
+   - Another for the WordPress website files.
+5. **Docker Network**: Establish a dedicated Docker network to connect these containers.
+6. **Automatic Restart**: Ensure containers automatically restart in case of a crash.
 
-Remote Interaction:
-When the Docker client is on a different machine than the Docker daemon, the client can connect to the daemon over the network. This is achieved by specifying the host where the Docker daemon is running, and the client communicates with the daemon using the Docker Remote API.
+## The most common commands used in docker-compose
+  - `up`: Create and start containers
+  - `down`: Stop and remove containers, networks, images, and volumes
+  - `start`: Start existing containers
+  - `stop`: Stop running containers
+  - `restart`: Restart running containers
+  - `build`: Build images
+  - `ps`: List containers
+  - `logs`: View output from containers
+  - `exec`: Run a command in a running container
+  - `pull`: Pull images from a registry
+  - `push`: Push images to a registry
 
-Command Execution:
-The Docker client sends commands to the Docker daemon using the Docker CLI or API. Commands include building images, running containers, managing networks, and more.
+## The most common commands used in docker
+  - `docker build`: Used to build a Docker image from a Dockerfile.
+  - `docker run`: Used to run a Docker container based on a Docker image.
+  - `docker pull`: Used to pull a Docker image from a registry, such as Docker Hub.
+  - `docker push`: Used to push a Docker image to a registry.
+  - `docker ps`: Used to list the running Docker containers on a system.
+  - `docker stop`: Used to stop a running Docker container.
+  - `docker rm`: Used to remove a Docker container.
+  - `docker rmi`: Used to remove a Docker image.
+  - `docker exec`: Used to execute a command in a running Docker container.
+  - `docker logs`: Used to view the logs for a Docker container.
 
-Resource Management:
-The Docker daemon is responsible for managing resources such as containers, images, volumes, and networks on the host machine. It communicates with container runtimes (e.g., containerd) for certain operations.
-
-
-## Docker Hub:
-
-Public Registry: Docker Hub is a public Docker registry managed by Docker, Inc. It is a centralized and public repository for sharing and discovering Docker images globally. Images on Docker Hub are publicly accessible, and anyone can search for, pull, and use images hosted on Docker Hub without authentication.
-
-Official Images: Docker Hub hosts a collection of "official images" that are maintained by Docker, Inc., and are considered reliable and well-maintained. These images cover a wide range of popular software applications, base operating systems, and development tools.
-
-Collaboration Platform: Docker Hub serves as a collaboration platform for the Docker community, allowing users to share their custom images, collaborate on open-source projects, and discover pre-built images for various software stacks.
-
-
-## Docker Registry:
-
-Generic Term:
-"Docker Registry" is a generic term that refers to any server or service that stores and manages Docker images. Docker Hub is one specific implementation of a Docker registry, but there are other registries as well.
-When you use the docker pull or docker run commands, Docker pulls the required images from your configured registry. When you use the docker push command, Docker pushes your image to your configured registry.
-
-Private Registries:
-Organizations may choose to set up their private Docker registries to store and manage custom images internally. Private registries provide control over access, security, and image distribution within an organization. Docker allows users to use public registries (like Docker Hub) or set up their private registries.
-* Set Up a Private Docker Registry on Linux : https://earthly.dev/blog/private-docker-registry/
-
-Docker Trusted Registry (DTR):
-Docker Trusted Registry is an enterprise-grade, commercially supported private registry solution provided by Docker, Inc. It offers additional features such as image signing, content trust, and integration with Docker Enterprise.
-* A Guide to Docker Private Registry : https://www.baeldung.com/ops/docker-private-registry
-
-
-## Docker objects :
-
-When you use Docker, you are creating and using images, containers, networks, volumes, plugins, and other objects. This section is a brief overview of some of those objects.
-
-* Images : 
-An image is a read-only template with instructions for creating a Docker container. Often, an image is based on another image, with some additional customization. For example, you may build an image which is based on the ubuntu image, but installs the Apache web server and your application, as well as the configuration details needed to make your application run.
-You might create your own images or you might only use those created by others and published in a registry. To build your own image, you create a Dockerfile with a simple syntax for defining the steps needed to create the image and run it. Each instruction in a Dockerfile creates a layer in the image. When you change the Dockerfile and rebuild the image, only those layers which have changed are rebuilt. This is part of what makes images so lightweight, small, and fast, when compared to other virtualization technologies.
-
-* Containers : 
-A container is a runnable instance of an image. You can create, start, stop, move, or delete a container using the Docker API or CLI. You can connect a container to one or more networks, attach storage to it, or even create a new image based on its current state.
-By default, a container is relatively well isolated from other containers and its host machine. You can control how isolated a container's network, storage, or other underlying subsystems are from other containers or from the host machine.
-A container is defined by its image as well as any configuration options you provide to it when you create or start it. When a container is removed, any changes to its state that aren't stored in persistent storage disappear.
-
-* Volumes : 
-Volumes are the preferred mechanism for persisting data generated by and used by Docker containers. While bind mounts are dependent on the directory structure and OS of the host machine, volumes are completely managed by Docker. Volumes have several advantages over bind mounts:
-* Volumes are easier to back up or migrate than bind mounts.
-* You can manage volumes using Docker CLI commands or the Docker API.
-* Volumes work on both Linux and Windows containers.
-* Volumes can be more safely shared among multiple containers.
-* Volume drivers let you store volumes on remote hosts or cloud providers, encrypt the contents of volumes, or add other functionality. 
-
-## What Is a Docker Network?
-Networking is about communication among processes, and Docker’s networking is no different. Docker networking is primarily used to establish communication between Docker containers and the outside world via the host machine where the Docker daemon is running.
