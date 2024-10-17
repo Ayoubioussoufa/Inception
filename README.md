@@ -1,6 +1,6 @@
 # Inception: Docker Infrastructure Setup Project
 
-![Image Description](https://github.com/aybiouss/inception/blob/master/dockere.png)
+![Image Description](https://github.com/Ayoubioussoufa/Inception/blob/main/dockere.png)
 
 ## Introduction
 
